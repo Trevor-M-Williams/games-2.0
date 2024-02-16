@@ -63,7 +63,7 @@ function spawnTile(
   switch (direction) {
     case "up":
       col = Math.floor(Math.random() * gridSize);
-      row = gridSize - 1;
+      row = gridSize + 1;
       break;
     case "down":
       col = Math.floor(Math.random() * gridSize);
@@ -81,13 +81,17 @@ function spawnTile(
 
   const id = Math.floor(Math.random() * 1000000000);
 
-  newTiles.push({
+  let newTile = {
     id,
     x: col,
     y: row,
     value,
-  });
+  };
 
+  return newTile;
+}
+
+export function updateSpawnTile(newTiles: Tile[]) {
   return newTiles;
 }
 
@@ -95,7 +99,7 @@ export function updateTiles(
   event: KeyboardEvent,
   tiles: Tile[],
   gridSize: number
-): { moved: boolean; newTiles: Tile[] } {
+) {
   let moved = false;
   let newTiles = tiles.map((tile) => ({ ...tile }));
 
@@ -164,7 +168,10 @@ export function updateTiles(
     }
   }
 
-  // if (moved) newTiles = spawnTile(newTiles, gridSize, [1, 2, 3], direction);
+  if (!moved) return { moved, newTiles, newTile: null };
 
-  return { moved, newTiles };
+  const newTile = spawnTile(newTiles, gridSize, [1, 2, 3], direction);
+  newTiles.push(newTile);
+
+  return { moved, newTiles, newTile };
 }
