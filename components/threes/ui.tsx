@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 export function GridSpace() {
   return <div className="w-24 h-32 rounded bg-gray-300"></div>;
 }
@@ -18,7 +20,10 @@ export function Tile({
 
   return (
     <div
-      className="w-24 h-32 absolute flex items-center justify-center text-6xl rounded bg-red-400 transition-all duration-250 ease-in-out"
+      className={cn(
+        "w-24 h-32 absolute flex items-center justify-center text-6xl rounded transition-all duration-250 ease-in-out",
+        bgColor
+      )}
       style={{
         transform: `translate(${position.x * deltaX + 16}px, ${
           position.y * deltaY + 16
