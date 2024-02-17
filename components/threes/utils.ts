@@ -56,43 +56,52 @@ function spawnTile(
   tileBag: number[],
   direction: string
 ) {
-  const value = 3;
-  let col = 0;
-  let row = 0;
-
-  switch (direction) {
-    case "up":
-      col = Math.floor(Math.random() * gridSize);
-      row = gridSize + 1;
-      break;
-    case "down":
-      col = Math.floor(Math.random() * gridSize);
-      break;
-    case "left":
-      row = Math.floor(Math.random() * gridSize);
-      col = gridSize - 1;
-      break;
-    case "right":
-      row = Math.floor(Math.random() * gridSize);
-      break;
-    default:
-      break;
-  }
+  const value = tileBag[Math.floor(Math.random() * tileBag.length)];
+  let position = getPositionForDirection(direction, gridSize, newTiles);
 
   const id = Math.floor(Math.random() * 1000000000);
-
   let newTile = {
     id,
-    x: col,
-    y: row,
+    x: position.col,
+    y: position.row,
     value,
   };
 
   return newTile;
 }
 
-export function updateSpawnTile(newTiles: Tile[]) {
-  return newTiles;
+function getPositionForDirection(
+  direction: string,
+  gridSize: number,
+  newTiles: Tile[]
+) {
+  let col = 0;
+  let row = 0;
+  let found = false;
+  while (!found) {
+    col = Math.floor(Math.random() * gridSize);
+    row = Math.floor(Math.random() * gridSize);
+    switch (direction) {
+      case "up":
+        found = !newTiles.find((t) => t.x === col && t.y === gridSize - 1);
+        row = gridSize + 1;
+        break;
+      case "down":
+        found = !newTiles.find((t) => t.x === col && t.y === 0);
+        row = -2;
+        break;
+      case "left":
+        found = !newTiles.find((t) => t.x === gridSize - 1 && t.y === row);
+        col = gridSize + 1;
+        break;
+      case "right":
+        found = !newTiles.find((t) => t.x === 0 && t.y === row);
+        col = -2;
+        break;
+    }
+  }
+
+  return { col, row };
 }
 
 export function updateTiles(
@@ -141,8 +150,6 @@ export function updateTiles(
       xIncrement = -1;
       xBoundary = gridSize - 1;
       direction = "right";
-      break;
-    case "default":
       break;
   }
 

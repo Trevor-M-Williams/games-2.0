@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { updateTiles, initTiles, mergeTiles, updateSpawnTile } from "../utils";
+import { updateTiles, initTiles, mergeTiles } from "../utils";
 
 export function useGameLogic(gridSize: number) {
   const [tiles, setTiles] = useState<Tile[]>([]);
@@ -17,6 +17,19 @@ export function useGameLogic(gridSize: number) {
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (isTransitioning) return;
+
+      const validKeys = [
+        "ArrowUp",
+        "ArrowDown",
+        "ArrowLeft",
+        "ArrowRight",
+        "w",
+        "a",
+        "s",
+        "d",
+      ];
+
+      if (!validKeys.includes(event.key)) return;
 
       const { moved, newTiles, newTile } = updateTiles(event, tiles, gridSize);
 
@@ -42,7 +55,6 @@ export function useGameLogic(gridSize: number) {
   function updateNewTile(newTiles: Tile[], newTile: Tile) {
     const newTileId = newTile.id;
 
-    //update the new tile
     const updatedTiles = newTiles.map((tile) => {
       if (tile.id === newTileId) {
         if (tile.x < 0) {
