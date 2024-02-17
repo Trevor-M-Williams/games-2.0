@@ -1,3 +1,31 @@
+export function checkGameOver(tiles: Tile[], gridSize: number) {
+  if (tiles.length !== gridSize ** 2) return false;
+
+  for (let i = 0; i < gridSize; i++) {
+    for (let j = 0; j < gridSize; j++) {
+      const tile = tiles.find((t) => t.x === i && t.y === j);
+      if (!tile) return false;
+
+      const adjacentTile1 = tiles.find((t) => t.x === i + 1 && t.y === j);
+      const adjacentTile2 = tiles.find((t) => t.x === i && t.y === j + 1);
+
+      if (adjacentTile1) {
+        if (checkMoveIsValid(tile, adjacentTile1)) {
+          return false;
+        }
+      }
+
+      if (adjacentTile2) {
+        if (checkMoveIsValid(tile, adjacentTile2)) {
+          return false;
+        }
+      }
+    }
+  }
+
+  return true;
+}
+
 function checkMoveIsValid(tile: Tile, adjacentTile: Tile | undefined) {
   if (!adjacentTile) return true;
   if (tile.value + adjacentTile.value === 3) return true;
@@ -53,10 +81,9 @@ export function mergeTiles(tiles: Tile[]) {
 function spawnTile(
   newTiles: Tile[],
   gridSize: number,
-  tileBag: number[],
+  nextTile: number,
   direction: string
 ) {
-  const value = tileBag[Math.floor(Math.random() * tileBag.length)];
   let position = getPositionForDirection(direction, gridSize, newTiles);
 
   const id = Math.floor(Math.random() * 1000000000);
@@ -64,7 +91,7 @@ function spawnTile(
     id,
     x: position.col,
     y: position.row,
-    value,
+    value: nextTile,
   };
 
   return newTile;
@@ -107,7 +134,8 @@ function getPositionForDirection(
 export function updateTiles(
   event: KeyboardEvent,
   tiles: Tile[],
-  gridSize: number
+  gridSize: number,
+  nextTile: number
 ) {
   let moved = false;
   let newTiles = tiles.map((tile) => ({ ...tile }));
@@ -177,7 +205,7 @@ export function updateTiles(
 
   if (!moved) return { moved, newTiles, newTile: null };
 
-  const newTile = spawnTile(newTiles, gridSize, [1, 2, 3], direction);
+  const newTile = spawnTile(newTiles, gridSize, nextTile, direction);
   newTiles.push(newTile);
 
   return { moved, newTiles, newTile };
