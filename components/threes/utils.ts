@@ -1,3 +1,30 @@
+const scoreMap = {
+  1: 0,
+  2: 0,
+  3: 1,
+  6: 2,
+  12: 3,
+  24: 4,
+  48: 5,
+  96: 6,
+  192: 7,
+  384: 8,
+  768: 9,
+  1536: 10,
+  3072: 11,
+  6144: 12,
+};
+
+export function calculateScore(tiles: Tile[]) {
+  let score = 0;
+  for (let i = 0; i < tiles.length; i++) {
+    const exponent = scoreMap[tiles[i].value as keyof typeof scoreMap];
+    score += 3 ** exponent;
+  }
+
+  return score;
+}
+
 export function checkGameOver(tiles: Tile[], gridSize: number) {
   if (tiles.length !== gridSize ** 2) return false;
 
@@ -35,29 +62,37 @@ function checkMoveIsValid(tile: Tile, adjacentTile: Tile | undefined) {
   return false;
 }
 
+export function getBonusTile(highTile: number) {
+  const exponent = scoreMap[highTile as keyof typeof scoreMap];
+  const bonusExponentMin = 2;
+  const bonusExponentMax = exponent - 3;
+  // get a random exponent between bonusExponentMin and bonusExponentMax
+  const randomExponent =
+    bonusExponentMin +
+    Math.floor(Math.random() * (bonusExponentMax - bonusExponentMin));
+  const bonusTile = 3 * 2 ** randomExponent;
+
+  return bonusTile;
+}
+
 export function initTiles(gridSize: number, tileBag: number[]) {
   let newTiles: Tile[] = [];
-  let newTileBag = [...tileBag];
 
-  for (let i = 0; i < gridSize; i++) {
-    for (let j = 0; j < gridSize; j++) {
-      if (Math.random() > 0.4) continue;
+  for (let i = 0; i < 9; i++) {
+    const nextTile = tileBag[i];
 
-      const randomIndex = Math.floor(Math.random() * newTileBag.length);
-      const randomTile = newTileBag[randomIndex];
-      newTileBag.splice(randomIndex, 1);
-
-      const id = Math.floor(Math.random() * 1000000000);
-
-      newTiles.push({
-        id,
-        x: i,
-        y: j,
-        value: randomTile,
-      });
+    while (true) {
+      const x = Math.floor(Math.random() * gridSize);
+      const y = Math.floor(Math.random() * gridSize);
+      const tile = newTiles.find((t) => t.x === x && t.y === y);
+      if (!tile) {
+        newTiles.push({ id: i, x, y, value: nextTile });
+        break;
+      }
     }
   }
 
+  const newTileBag = tileBag.slice(9);
   return { newTiles, newTileBag };
 }
 
@@ -84,7 +119,7 @@ function spawnTile(
   nextTile: number,
   direction: string
 ) {
-  let position = getPositionForDirection(direction, gridSize, newTiles);
+  let position = getTilePosition(direction, gridSize, newTiles);
 
   const id = Math.floor(Math.random() * 1000000000);
   let newTile = {
@@ -95,40 +130,41 @@ function spawnTile(
   };
 
   return newTile;
-}
 
-function getPositionForDirection(
-  direction: string,
-  gridSize: number,
-  newTiles: Tile[]
-) {
-  let col = 0;
-  let row = 0;
-  let found = false;
-  while (!found) {
-    col = Math.floor(Math.random() * gridSize);
-    row = Math.floor(Math.random() * gridSize);
-    switch (direction) {
-      case "up":
-        found = !newTiles.find((t) => t.x === col && t.y === gridSize - 1);
-        row = gridSize + 1;
-        break;
-      case "down":
-        found = !newTiles.find((t) => t.x === col && t.y === 0);
-        row = -2;
-        break;
-      case "left":
-        found = !newTiles.find((t) => t.x === gridSize - 1 && t.y === row);
-        col = gridSize + 1;
-        break;
-      case "right":
-        found = !newTiles.find((t) => t.x === 0 && t.y === row);
-        col = -2;
-        break;
+  function getTilePosition(
+    direction: string,
+    gridSize: number,
+    newTiles: Tile[]
+  ) {
+    let col = 0;
+    let row = 0;
+    let found = false;
+
+    while (!found) {
+      col = Math.floor(Math.random() * gridSize);
+      row = Math.floor(Math.random() * gridSize);
+      switch (direction) {
+        case "up":
+          found = !newTiles.find((t) => t.x === col && t.y === gridSize - 1);
+          row = gridSize - 1;
+          break;
+        case "down":
+          found = !newTiles.find((t) => t.x === col && t.y === 0);
+          row = 0;
+          break;
+        case "left":
+          found = !newTiles.find((t) => t.x === gridSize - 1 && t.y === row);
+          col = gridSize - 1;
+          break;
+        case "right":
+          found = !newTiles.find((t) => t.x === 0 && t.y === row);
+          col = 0;
+          break;
+      }
     }
-  }
 
-  return { col, row };
+    return { col, row };
+  }
 }
 
 export function updateTiles(
@@ -208,5 +244,5 @@ export function updateTiles(
   const newTile = spawnTile(newTiles, gridSize, nextTile, direction);
   newTiles.push(newTile);
 
-  return { moved, newTiles, newTile };
+  return { moved, newTiles };
 }

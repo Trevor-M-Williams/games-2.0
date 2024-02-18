@@ -44,7 +44,7 @@ export function NextTile({ value }: { value: number }) {
   if (value === 2) bgColor = "bg-blue-400";
 
   return (
-    <div className="bg-gray-200 p-4 rounded">
+    <div className="bg-gray-200 p-3 rounded">
       <div
         className={cn(
           "w-[4.5rem] h-[6rem] flex items-center justify-center text-6xl rounded",
