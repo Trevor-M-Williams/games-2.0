@@ -24,7 +24,7 @@ export function Tile({
   return (
     <div
       className={cn(
-        "w-24 h-32 absolute flex items-center justify-center text-6xl rounded transition-all duration-250 ease-in-out",
+        "w-24 h-32 absolute flex items-center justify-center text-6xl rounded transition-transform duration-250 ease-in-out",
         bgColor
       )}
       style={{
@@ -59,16 +59,48 @@ export function NextTile({ value }: { value: number }) {
 
 export function GameOverModal({
   score,
+  highScores,
+  newHighScore,
   onRestart,
 }: {
   score: number;
+  highScores: Score[];
+  newHighScore: string;
   onRestart: () => void;
 }) {
   return (
     <Modal>
-      <div className="flex flex-col gap-6 items-start">
-        <h1 className="text-4xl font-bold">Game Over</h1>
-        <div className="text-3xl">Score: {score}</div>
+      <div className="flex flex-col items-start">
+        <div className="w-full flex items-center justify-between mb-6">
+          <h1 className="text-4xl font-semibold">Game Over</h1>
+          <div className="text-3xl">
+            <div>Score: {score}</div>
+            {newHighScore && (
+              <div className="absolute text-blue-500 text-sm">
+                New High Score!
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="text-2xl">High Scores:</div>
+        <div className="w-full max-w-[16rem] flex flex-col gap-2 px-2 my-4">
+          {highScores
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 10)
+            .map((score, i) => (
+              <div
+                key={score.id}
+                className={cn(
+                  "flex text-2xl",
+                  newHighScore === score.id && "text-blue-500"
+                )}
+              >
+                <div className="w-16">{i + 1}.</div>
+                <div>{score.score}</div>
+                <div className="flex-grow text-right">{score.name}</div>
+              </div>
+            ))}
+        </div>
         <Button onClick={onRestart}>Restart</Button>
       </div>
     </Modal>

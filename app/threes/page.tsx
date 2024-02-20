@@ -8,15 +8,30 @@ import {
 import { useGameLogic } from "@/components/threes/game-logic";
 
 export default function Threes() {
-  const gridSize = 4;
-  const { tiles, nextTile, gameOver, onRestart, score, moveCount } =
-    useGameLogic(gridSize);
+  const gridSize = 3;
+  const {
+    tiles,
+    nextTile,
+    gameOver,
+    onRestart,
+    score,
+    highScores,
+    newHighScore,
+    moveCount,
+  } = useGameLogic(gridSize);
 
   return (
     <div className="h-full w-full flex flex-col gap-6 items-center justify-center">
-      <div className="absolute top-0 right-0">{moveCount}</div>
+      {/* <div className="absolute top-0 right-0">{moveCount}</div> */}
 
-      {gameOver && <GameOverModal score={score} onRestart={onRestart} />}
+      {gameOver && (
+        <GameOverModal
+          score={score}
+          highScores={highScores}
+          newHighScore={newHighScore}
+          onRestart={onRestart}
+        />
+      )}
 
       <NextTile value={nextTile} />
 

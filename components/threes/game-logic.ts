@@ -6,6 +6,7 @@ import {
   checkGameOver,
   calculateScore,
   getBonusTile,
+  updateNewTile,
 } from "./utils";
 
 export function useGameLogic(gridSize: number) {
@@ -19,6 +20,8 @@ export function useGameLogic(gridSize: number) {
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [highTile, setHighTile] = useState(0);
+  const [highScores, setHighScores] = useState<Score[]>([]);
+  const [newHighScore, setNewHighScore] = useState("");
 
   useEffect(() => {
     const shuffledTileBag = initialTileBag.sort(() => Math.random() - 0.5);
@@ -29,6 +32,19 @@ export function useGameLogic(gridSize: number) {
     setTiles(newTiles);
     setNextTile(nextTile);
     setTileBag(newTileBag);
+
+    async function fetchScores() {
+      const res = await fetch("/api/threes");
+      if (res.ok) {
+        let scores = await res.json();
+        scores = scores
+          .sort((a: Score, b: Score) => b.score - a.score)
+          .slice(0, 10);
+        setHighScores(scores);
+      }
+    }
+
+    fetchScores();
   }, [gridSize]);
 
   useEffect(() => {
@@ -49,9 +65,14 @@ export function useGameLogic(gridSize: number) {
 
       if (!validKeys.includes(event.key)) return;
 
-      const { moved, newTiles } = updateTiles(event, tiles, gridSize, nextTile);
+      const { moved, newTiles, newTile } = updateTiles(
+        event,
+        tiles,
+        gridSize,
+        nextTile
+      );
 
-      if (moved) {
+      if (moved && newTile) {
         const newHighTile = Math.max(...newTiles.map((tile) => tile.value));
 
         const nextTile = tileBag[0];
@@ -74,9 +95,47 @@ export function useGameLogic(gridSize: number) {
         setTileBag(newTileBag);
 
         setTimeout(() => {
+          setTiles(updateNewTile(newTiles, newTile, gridSize));
+        }, 10);
+
+        setTimeout(async () => {
+          const mergedTiles = mergeTiles(newTiles);
+          setTiles(mergedTiles);
           setIsTransitioning(false);
-          setTiles(mergeTiles(newTiles));
-        }, 120);
+
+          if (checkGameOver(mergedTiles, gridSize)) {
+            const score = calculateScore(mergedTiles);
+            setScore(score);
+
+            const res = await fetch("/api/threes", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ name: "Trev", score }),
+            });
+
+            if (!res.ok) {
+              console.error("Failed to save score");
+            }
+
+            const data = await res.json();
+
+            if (
+              data.score > highScores[highScores.length - 1].score ||
+              highScores.length < 10
+            ) {
+              const newHighScores = [...highScores, data]
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 10);
+
+              setHighScores(newHighScores);
+              setNewHighScore(data.id);
+            }
+
+            setGameOver(true);
+          }
+        }, 100);
       }
     }
 
@@ -93,18 +152,6 @@ export function useGameLogic(gridSize: number) {
     highTile,
   ]);
 
-  useEffect(() => {
-    // to promote focus
-    // if (moveCount > 10) {
-    //   setScore(0);
-    //   setGameOver(true);
-    // }
-    if (checkGameOver(tiles, gridSize)) {
-      setScore(calculateScore(tiles));
-      setGameOver(true);
-    }
-  }, [tiles]);
-
   function onRestart() {
     let { newTiles, newTileBag } = initTiles(gridSize, initialTileBag);
     const nextTile = newTileBag[0];
@@ -115,7 +162,19 @@ export function useGameLogic(gridSize: number) {
     setTileBag(newTileBag);
     setGameOver(false);
     setMoveCount(0);
+    setScore(0);
+    setHighTile(0);
+    setNewHighScore("");
   }
 
-  return { tiles, nextTile, gameOver, onRestart, score, moveCount };
+  return {
+    tiles,
+    nextTile,
+    gameOver,
+    onRestart,
+    score,
+    highScores,
+    newHighScore,
+    moveCount,
+  };
 }

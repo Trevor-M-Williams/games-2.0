@@ -26,7 +26,7 @@ export function calculateScore(tiles: Tile[]) {
 }
 
 export function checkGameOver(tiles: Tile[], gridSize: number) {
-  if (tiles.length !== gridSize ** 2) return false;
+  if (tiles.length < gridSize ** 2) return false;
 
   for (let i = 0; i < gridSize; i++) {
     for (let j = 0; j < gridSize; j++) {
@@ -66,7 +66,6 @@ export function getBonusTile(highTile: number) {
   const exponent = scoreMap[highTile as keyof typeof scoreMap];
   const bonusExponentMin = 2;
   const bonusExponentMax = exponent - 3;
-  // get a random exponent between bonusExponentMin and bonusExponentMax
   const randomExponent =
     bonusExponentMin +
     Math.floor(Math.random() * (bonusExponentMax - bonusExponentMin));
@@ -146,25 +145,39 @@ function spawnTile(
       switch (direction) {
         case "up":
           found = !newTiles.find((t) => t.x === col && t.y === gridSize - 1);
-          row = gridSize - 1;
+          row = gridSize + 1;
           break;
         case "down":
           found = !newTiles.find((t) => t.x === col && t.y === 0);
-          row = 0;
+          row = -2;
           break;
         case "left":
           found = !newTiles.find((t) => t.x === gridSize - 1 && t.y === row);
-          col = gridSize - 1;
+          col = gridSize + 1;
           break;
         case "right":
           found = !newTiles.find((t) => t.x === 0 && t.y === row);
-          col = 0;
+          col = -2;
           break;
       }
     }
 
     return { col, row };
   }
+}
+
+export function updateNewTile(tiles: Tile[], newTile: Tile, gridSize: number) {
+  const newTiles = [...tiles];
+  const tile = newTiles.find((t) => t.x === newTile.x && t.y === newTile.y);
+
+  if (!tile) return newTiles;
+
+  if (tile.x > gridSize) tile.x = gridSize - 1;
+  else if (tile.x < 0) tile.x = 0;
+  else if (tile.y > gridSize) tile.y = gridSize - 1;
+  else if (tile.y < 0) tile.y = 0;
+
+  return newTiles;
 }
 
 export function updateTiles(
@@ -244,5 +257,5 @@ export function updateTiles(
   const newTile = spawnTile(newTiles, gridSize, nextTile, direction);
   newTiles.push(newTile);
 
-  return { moved, newTiles };
+  return { moved, newTiles, newTile };
 }
