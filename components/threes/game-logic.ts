@@ -106,33 +106,6 @@ export function useGameLogic(gridSize: number) {
           if (checkGameOver(mergedTiles, gridSize)) {
             const score = calculateScore(mergedTiles);
             setScore(score);
-
-            const res = await fetch("/api/threes", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ name: "Trev", score }),
-            });
-
-            if (!res.ok) {
-              console.error("Failed to save score");
-            }
-
-            const data = await res.json();
-
-            if (
-              data.score > highScores[highScores.length - 1].score ||
-              highScores.length < 10
-            ) {
-              const newHighScores = [...highScores, data]
-                .sort((a, b) => b.score - a.score)
-                .slice(0, 10);
-
-              setHighScores(newHighScores);
-              setNewHighScore(data.id);
-            }
-
             setGameOver(true);
           }
         }, 100);
@@ -152,7 +125,7 @@ export function useGameLogic(gridSize: number) {
     highTile,
   ]);
 
-  function onRestart() {
+  function handleRestart() {
     let { newTiles, newTileBag } = initTiles(gridSize, initialTileBag);
     const nextTile = newTileBag[0];
     newTileBag = newTileBag.slice(1);
@@ -167,14 +140,43 @@ export function useGameLogic(gridSize: number) {
     setNewHighScore("");
   }
 
+  async function handleGameOver(name: string) {
+    const res = await fetch("/api/threes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name, score }),
+    });
+
+    if (!res.ok) {
+      console.error("Failed to save score");
+    }
+
+    const data = await res.json();
+
+    if (
+      data.score > highScores[highScores.length - 1].score ||
+      highScores.length < 10
+    ) {
+      const newHighScores = [...highScores, data]
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 10);
+
+      setHighScores(newHighScores);
+      setNewHighScore(data.id);
+    }
+  }
+
   return {
     tiles,
     nextTile,
     gameOver,
-    onRestart,
     score,
     highScores,
     newHighScore,
     moveCount,
+    handleRestart,
+    handleGameOver,
   };
 }

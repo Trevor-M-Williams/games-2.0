@@ -13,11 +13,11 @@ export default function Threes() {
     tiles,
     nextTile,
     gameOver,
-    onRestart,
+    handleRestart,
+    handleGameOver,
     score,
     highScores,
     newHighScore,
-    moveCount,
   } = useGameLogic(gridSize);
 
   return (
@@ -29,7 +29,8 @@ export default function Threes() {
           score={score}
           highScores={highScores}
           newHighScore={newHighScore}
-          onRestart={onRestart}
+          handleGameOver={handleGameOver}
+          handleRestart={handleRestart}
         />
       )}
 
