@@ -156,8 +156,8 @@ export function useGameLogic(gridSize: number) {
     const data = await res.json();
 
     if (
-      data.score > highScores[highScores.length - 1].score ||
-      highScores.length < 10
+      highScores.length < 10 ||
+      data.score > highScores[highScores.length - 1].score
     ) {
       const newHighScores = [...highScores, data]
         .sort((a, b) => b.score - a.score)
