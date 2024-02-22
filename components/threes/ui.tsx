@@ -25,7 +25,7 @@ export function Tile({
   return (
     <div
       className={cn(
-        "w-24 h-32 absolute flex items-center justify-center text-6xl rounded transition-transform duration-250 ease-in-out",
+        "w-24 h-32 absolute flex items-center justify-center text-6xl rounded transition-transform duration-150 ease-in-out",
         bgColor
       )}
       style={{

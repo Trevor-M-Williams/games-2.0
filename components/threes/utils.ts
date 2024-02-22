@@ -104,8 +104,14 @@ export function mergeTiles(tiles: Tile[]) {
       (t) => t.x === tile.x && t.y === tile.y && t.id !== tile.id
     );
     if (matchingTile) {
-      matchingTile.value += tile.value;
-      newTiles.splice(i, 1);
+      if (
+        (tile.value === 1 && matchingTile.value === 2) ||
+        (tile.value === 2 && matchingTile.value === 1) ||
+        (tile.value === matchingTile.value && tile.value > 2)
+      ) {
+        matchingTile.value += tile.value;
+        newTiles.splice(i, 1);
+      }
     }
   }
 
