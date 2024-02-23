@@ -2,12 +2,12 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDbVLMs7FI0VO-tSo5F7Gs-eowyIOYCpsk",
-  authDomain: "threes-2e801.firebaseapp.com",
-  projectId: "threes-2e801",
-  storageBucket: "threes-2e801.appspot.com",
-  messagingSenderId: "307714708393",
-  appId: "1:307714708393:web:bad557ab86e5c0988beab8",
+  apiKey: "AIzaSyC54VyfSPZ1ZK8GC8zeimx3_ozevlyr11Q",
+  authDomain: "threes-dev.firebaseapp.com",
+  projectId: "threes-dev",
+  storageBucket: "threes-dev.appspot.com",
+  messagingSenderId: "175425727284",
+  appId: "1:175425727284:web:3239fe949933f3e396d361",
 };
 
 const app = initializeApp(firebaseConfig);

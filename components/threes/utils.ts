@@ -26,6 +26,8 @@ export function calculateScore(tiles: Tile[]) {
 }
 
 export function checkGameOver(tiles: Tile[], gridSize: number) {
+  logTiles(tiles, gridSize);
+
   if (tiles.length < gridSize ** 2) return false;
 
   for (let i = 0; i < gridSize; i++) {
@@ -50,6 +52,7 @@ export function checkGameOver(tiles: Tile[], gridSize: number) {
     }
   }
 
+  console.log("Game Over");
   return true;
 }
 
@@ -77,7 +80,9 @@ export function getBonusTile(highTile: number) {
 export function initTiles(gridSize: number, tileBag: number[]) {
   let newTiles: Tile[] = [];
 
-  for (let i = 0; i < 9; i++) {
+  const numTiles = Math.floor((gridSize ** 2 * 9) / 16);
+
+  for (let i = 0; i < numTiles; i++) {
     const nextTile = tileBag[i];
 
     while (true) {
@@ -91,7 +96,7 @@ export function initTiles(gridSize: number, tileBag: number[]) {
     }
   }
 
-  const newTileBag = tileBag.slice(9);
+  const newTileBag = tileBag.slice(numTiles);
   return { newTiles, newTileBag };
 }
 
@@ -151,19 +156,19 @@ function spawnTile(
       switch (direction) {
         case "up":
           found = !newTiles.find((t) => t.x === col && t.y === gridSize - 1);
-          row = gridSize + 1;
+          row = gridSize - 1;
           break;
         case "down":
           found = !newTiles.find((t) => t.x === col && t.y === 0);
-          row = -2;
+          row = 0;
           break;
         case "left":
           found = !newTiles.find((t) => t.x === gridSize - 1 && t.y === row);
-          col = gridSize + 1;
+          col = gridSize - 1;
           break;
         case "right":
           found = !newTiles.find((t) => t.x === 0 && t.y === row);
-          col = -2;
+          col = 0;
           break;
       }
     }
@@ -187,7 +192,7 @@ export function updateNewTile(tiles: Tile[], newTile: Tile, gridSize: number) {
 }
 
 export function updateTiles(
-  event: KeyboardEvent,
+  key: string,
   tiles: Tile[],
   gridSize: number,
   nextTile: number
@@ -205,7 +210,7 @@ export function updateTiles(
   let yBoundary = null;
   let direction = "";
 
-  switch (event.key) {
+  switch (key) {
     case "ArrowUp":
     case "w":
       dy = -1;
@@ -264,4 +269,23 @@ export function updateTiles(
   newTiles.push(newTile);
 
   return { moved, newTiles, newTile };
+}
+
+// --------- Utility Functions --------- //
+
+function logTiles(tiles: Tile[], gridSize: number) {
+  const grid = Array.from({ length: gridSize }, () =>
+    Array.from({ length: gridSize }, () => ".")
+  );
+
+  tiles.forEach((tile) => {
+    if (tile.x >= 0 && tile.x < gridSize && tile.y >= 0 && tile.y < gridSize) {
+      grid[tile.y][tile.x] = tile.value.toString();
+    } else {
+      console.log("Invalid tile position:", tile);
+    }
+  });
+
+  console.log("Board:");
+  grid.forEach((row) => console.log(row.join(" ")));
 }
