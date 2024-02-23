@@ -1,9 +1,22 @@
-import { getDocs, collection, addDoc } from "firebase/firestore";
+import {
+  getDocs,
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  limit,
+} from "firebase/firestore";
 import { db } from "@/db/firebase";
 
 export async function GET() {
-  const scores: Score[] = [];
-  const querySnapshot = await getDocs(collection(db, "scores"));
+  const scoresQuery = query(
+    collection(db, "scores"),
+    orderBy("score", "desc"),
+    limit(10)
+  );
+
+  const querySnapshot = await getDocs(scoresQuery);
+  let scores: Score[] = [];
   querySnapshot.forEach((doc) => {
     scores.push({ id: doc.id, ...doc.data() } as Score);
   });
