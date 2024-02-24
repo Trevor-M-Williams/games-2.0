@@ -21,9 +21,7 @@ export default function Threes() {
   } = useGameLogic(gridSize);
 
   return (
-    <div className="h-full w-full flex flex-col gap-6 items-center justify-center">
-      {/* <div className="absolute top-0 right-0">{moveCount}</div> */}
-
+    <div className="flex h-full w-full flex-col items-center justify-center gap-6">
       {gameOver && (
         <GameOverModal
           score={score}
@@ -37,7 +35,7 @@ export default function Threes() {
       <NextTile value={nextTile} />
 
       <div
-        className="relative grid gap-4 p-4 rounded-lg bg-gray-200"
+        className="relative grid gap-4 rounded-lg bg-gray-200 p-4"
         style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}
       >
         {Array.from({ length: gridSize ** 2 }).map((_, index) => {
@@ -48,6 +46,7 @@ export default function Threes() {
             key={tile.id}
             value={tile.value}
             position={{ x: tile.x, y: tile.y }}
+            transition={tile.transition}
           />
         ))}
       </div>

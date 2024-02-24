@@ -1,37 +1,64 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Modal from "@/components/modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 export function GridSpace() {
-  return <div className="w-24 h-32 rounded bg-gray-300"></div>;
+  return <div className="h-32 w-24 rounded bg-gray-300"></div>;
 }
 
 export function Tile({
   value,
   position,
+  transition,
 }: {
   value: number;
   position: { x: number; y: number };
+  transition?: "left" | "right" | "up" | "down";
 }) {
+  const tileRef = useRef<HTMLDivElement>(null);
+
   const dx = 112;
   const dy = 144;
+
+  const xPos = position.x * dx + 16;
+  const yPos = position.y * dy + 16;
 
   let bgColor = "bg-white";
   if (value === 1) bgColor = "bg-red-400";
   if (value === 2) bgColor = "bg-blue-400";
 
+  useEffect(() => {
+    if (!transition) return;
+    if (!tileRef.current) return;
+
+    let xStart = xPos;
+    let yStart = yPos;
+
+    if (transition === "left") xStart += 2 * dx;
+    else if (transition === "right") xStart -= 2 * dx;
+    else if (transition === "up") yStart += 2 * dy;
+    else if (transition === "down") yStart -= 2 * dy;
+
+    tileRef.current.style.transform = `translate(${xStart}px, ${yStart}px)`;
+
+    setTimeout(() => {
+      if (!tileRef.current) return;
+
+      tileRef.current.style.transform = `translate(${xPos}px, ${yPos}px)`;
+    }, 10);
+  }, [value, position]);
+
   return (
     <div
+      ref={tileRef}
       className={cn(
-        "w-24 h-32 absolute flex items-center justify-center text-6xl rounded transition-transform duration-150 ease-in-out",
-        bgColor
+        "absolute flex h-32 w-24 items-center justify-center rounded border text-6xl transition-transform duration-150 ease-in-out",
+        bgColor,
       )}
       style={{
-        transform: `translate(${position.x * dx + 16}px, ${
-          position.y * dy + 16
-        }px)`,
+        transform: `translate(${xPos}px, ${yPos}px)`,
       }}
     >
       {value}
@@ -45,11 +72,11 @@ export function NextTile({ value }: { value: number }) {
   if (value === 2) bgColor = "bg-blue-400";
 
   return (
-    <div className="bg-gray-200 p-3 rounded">
+    <div className="rounded bg-gray-200 p-3">
       <div
         className={cn(
-          "w-[4.5rem] h-[6rem] flex items-center justify-center text-6xl rounded",
-          bgColor
+          "flex h-[6rem] w-[4.5rem] items-center justify-center rounded text-6xl",
+          bgColor,
         )}
       >
         {value}
@@ -88,8 +115,8 @@ export function GameOverModal({
     <Modal>
       {!scoreSubmitted ? (
         <>
-          <div className="flex flex-col gap-6 items-start">
-            <div className="w-full flex items-center gap-6 text-3xl font-medium">
+          <div className="flex flex-col items-start gap-6">
+            <div className="flex w-full items-center gap-6 text-3xl font-medium">
               <h1>Game Over</h1>
               <div className="font-medium">Score: {score}</div>
             </div>
@@ -109,12 +136,12 @@ export function GameOverModal({
           <div className="flex items-center gap-6">
             <div className="text-2xl">High Scores:</div>
             {newHighScore && (
-              <div className="text-blue-500 text-lg text-nowrap">
+              <div className="text-nowrap text-lg text-blue-500">
                 New High Score!
               </div>
             )}
           </div>
-          <div className="w-full flex flex-col gap-2 px-4 my-4">
+          <div className="my-4 flex w-full flex-col gap-2 px-4">
             {highScores
               .sort((a, b) => b.score - a.score)
               .slice(0, 10)
@@ -123,7 +150,7 @@ export function GameOverModal({
                   key={score.id}
                   className={cn(
                     "flex text-2xl",
-                    newHighScore === score.id && "text-blue-500"
+                    newHighScore === score.id && "text-blue-500",
                   )}
                 >
                   <div className="w-16">{i + 1}.</div>

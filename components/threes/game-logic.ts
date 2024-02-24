@@ -30,24 +30,32 @@ export function useGameLogic(gridSize: number) {
   }, [gridSize]);
 
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (gameOver || isTransitioning || mode !== "player") return;
-      const validKeys = [
-        "ArrowUp",
-        "ArrowDown",
-        "ArrowLeft",
-        "ArrowRight",
-        "w",
-        "a",
-        "s",
-        "d",
-      ];
-      if (!validKeys.includes(event.key)) return;
-      processMove(event.key);
-    };
+    if (gameOver || isTransitioning) return;
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    if (mode === "player") {
+      const handleKeyDown = (event: KeyboardEvent) => {
+        const validKeys = [
+          "ArrowUp",
+          "ArrowDown",
+          "ArrowLeft",
+          "ArrowRight",
+          "w",
+          "a",
+          "s",
+          "d",
+        ];
+        if (!validKeys.includes(event.key)) return;
+        processMove(event.key);
+      };
+
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    } else if (mode === "bot") {
+      const interval = setInterval(simulateBotMove, 500);
+      return () => clearInterval(interval);
+    } else {
+      console.error("Invalid mode");
+    }
   }, [
     tiles,
     isTransitioning,
@@ -58,22 +66,6 @@ export function useGameLogic(gridSize: number) {
     nextTile,
     highTile,
     mode,
-  ]);
-
-  useEffect(() => {
-    if (mode !== "bot" || gameOver) return;
-    const interval = setInterval(simulateBotMove, 500);
-    return () => clearInterval(interval);
-  }, [
-    mode,
-    gameOver,
-    tiles,
-    isTransitioning,
-    moveCount,
-    gridSize,
-    tileBag,
-    nextTile,
-    highTile,
   ]);
 
   async function fetchScores() {
@@ -90,7 +82,7 @@ export function useGameLogic(gridSize: number) {
         key,
         currentTiles,
         gridSize,
-        nextTile
+        nextTile,
       );
 
       if (moved && newTile) {
@@ -105,7 +97,7 @@ export function useGameLogic(gridSize: number) {
   function restartGame() {
     const { newTiles, newTileBag } = initTiles(
       gridSize,
-      [...initialTileBag].sort(() => Math.random() - 0.5)
+      [...initialTileBag].sort(() => Math.random() - 0.5),
     );
     setTiles(newTiles);
     setTileBag(newTileBag.slice(1)); // Remove the first tile which is set as nextTile
@@ -120,7 +112,7 @@ export function useGameLogic(gridSize: number) {
   function updateAfterMove(newTiles: Tile[], newTile: Tile) {
     const newHighTile = Math.max(
       ...newTiles.map((tile) => tile.value),
-      highTile
+      highTile,
     );
 
     setMoveCount((prevCount) => prevCount + 1);
@@ -150,7 +142,6 @@ export function useGameLogic(gridSize: number) {
         if (isGameOver) {
           finalizeGame(mergedTiles);
         }
-        console.log(nextTile, updatedTileBag);
         return mergedTiles;
       });
     }, 100);
@@ -182,10 +173,7 @@ export function useGameLogic(gridSize: number) {
       console.error("Failed to save score");
     }
 
-    // const data = await res.json();
-
-    const timestamp = Date.now().toString();
-    const data = { id: timestamp, name, score };
+    const data = await res.json();
 
     if (
       highScores.length < 10 ||

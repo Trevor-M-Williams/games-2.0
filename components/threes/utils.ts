@@ -52,7 +52,6 @@ export function checkGameOver(tiles: Tile[], gridSize: number) {
     }
   }
 
-  console.log("Game Over");
   return true;
 }
 
@@ -106,7 +105,7 @@ export function mergeTiles(tiles: Tile[]) {
   for (let i = 0; i < newTiles.length; i++) {
     const tile = newTiles[i];
     const matchingTile = newTiles.find(
-      (t) => t.x === tile.x && t.y === tile.y && t.id !== tile.id
+      (t) => t.x === tile.x && t.y === tile.y && t.id !== tile.id,
     );
     if (matchingTile) {
       if (
@@ -127,7 +126,7 @@ function spawnTile(
   newTiles: Tile[],
   gridSize: number,
   nextTile: number,
-  direction: string
+  direction: "up" | "down" | "left" | "right",
 ) {
   let position = getTilePosition(direction, gridSize, newTiles);
 
@@ -137,6 +136,7 @@ function spawnTile(
     x: position.col,
     y: position.row,
     value: nextTile,
+    transition: direction,
   };
 
   return newTile;
@@ -144,7 +144,7 @@ function spawnTile(
   function getTilePosition(
     direction: string,
     gridSize: number,
-    newTiles: Tile[]
+    newTiles: Tile[],
   ) {
     let col = 0;
     let row = 0;
@@ -195,10 +195,13 @@ export function updateTiles(
   key: string,
   tiles: Tile[],
   gridSize: number,
-  nextTile: number
+  nextTile: number,
 ) {
   let moved = false;
-  let newTiles = tiles.map((tile) => ({ ...tile }));
+  let newTiles = tiles.map((t) => {
+    const { transition, ...tile } = t;
+    return tile;
+  });
 
   let dx = 0;
   let dy = 0;
@@ -208,7 +211,7 @@ export function updateTiles(
   let yIncrement = 1;
   let xBoundary = null;
   let yBoundary = null;
-  let direction = "";
+  let direction: "up" | "down" | "left" | "right" | null = null;
 
   switch (key) {
     case "ArrowUp":
@@ -252,7 +255,7 @@ export function updateTiles(
       if (!tile) continue;
 
       const adjacentTile = newTiles.find(
-        (t) => t.x === tile.x + dx && t.y === tile.y + dy
+        (t) => t.x === tile.x + dx && t.y === tile.y + dy,
       );
 
       if (checkMoveIsValid(tile, adjacentTile)) {
@@ -263,7 +266,7 @@ export function updateTiles(
     }
   }
 
-  if (!moved) return { moved, newTiles, newTile: null };
+  if (!moved || !direction) return { moved, newTiles, newTile: null };
 
   const newTile = spawnTile(newTiles, gridSize, nextTile, direction);
   newTiles.push(newTile);
@@ -275,14 +278,12 @@ export function updateTiles(
 
 function logTiles(tiles: Tile[], gridSize: number) {
   const grid = Array.from({ length: gridSize }, () =>
-    Array.from({ length: gridSize }, () => ".")
+    Array.from({ length: gridSize }, () => "."),
   );
 
   tiles.forEach((tile) => {
     if (tile.x >= 0 && tile.x < gridSize && tile.y >= 0 && tile.y < gridSize) {
       grid[tile.y][tile.x] = tile.value.toString();
-    } else {
-      console.log("Invalid tile position:", tile);
     }
   });
 

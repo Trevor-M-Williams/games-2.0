@@ -9,4 +9,5 @@ type Tile = {
   x: number;
   y: number;
   value: number;
+  transition?: "left" | "right" | "up" | "down";
 };
