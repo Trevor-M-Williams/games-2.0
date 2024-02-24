@@ -29,32 +29,32 @@ export function Tile({
   if (value === 1) bgColor = "bg-red-400";
   if (value === 2) bgColor = "bg-blue-400";
 
-  useEffect(() => {
-    if (!transition) return;
-    if (!tileRef.current) return;
+  // useEffect(() => {
+  //   if (!transition) return;
+  //   if (!tileRef.current) return;
 
-    let xStart = xPos;
-    let yStart = yPos;
+  //   let xStart = xPos;
+  //   let yStart = yPos;
 
-    if (transition === "left") xStart += 2 * dx;
-    else if (transition === "right") xStart -= 2 * dx;
-    else if (transition === "up") yStart += 2 * dy;
-    else if (transition === "down") yStart -= 2 * dy;
+  //   if (transition === "left") xStart += 2 * dx;
+  //   else if (transition === "right") xStart -= 2 * dx;
+  //   else if (transition === "up") yStart += 2 * dy;
+  //   else if (transition === "down") yStart -= 2 * dy;
 
-    tileRef.current.style.transform = `translate(${xStart}px, ${yStart}px)`;
+  //   tileRef.current.style.transform = `translate(${xStart}px, ${yStart}px)`;
 
-    setTimeout(() => {
-      if (!tileRef.current) return;
+  //   setTimeout(() => {
+  //     if (!tileRef.current) return;
 
-      tileRef.current.style.transform = `translate(${xPos}px, ${yPos}px)`;
-    }, 10);
-  }, [value, position]);
+  //     tileRef.current.style.transform = `translate(${xPos}px, ${yPos}px)`;
+  //   }, 10);
+  // }, [value, position]);
 
   return (
     <div
       ref={tileRef}
       className={cn(
-        "absolute flex h-32 w-24 items-center justify-center rounded border text-6xl transition-transform duration-150 ease-in-out",
+        "absolute flex h-32 w-24 items-center justify-center rounded border text-6xl transition-transform duration-100 ease-in-out",
         bgColor,
       )}
       style={{
