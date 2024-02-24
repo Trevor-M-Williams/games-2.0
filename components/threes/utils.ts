@@ -26,7 +26,7 @@ export function calculateScore(tiles: Tile[]) {
 }
 
 export function checkGameOver(tiles: Tile[], gridSize: number) {
-  logTiles(tiles, gridSize);
+  // logTiles(tiles, gridSize);
 
   if (tiles.length < gridSize ** 2) return false;
 
