@@ -119,7 +119,7 @@ export function GameOverModal({
       {!scoreSubmitted ? (
         <>
           <div className="flex flex-col items-start gap-6">
-            <div className="flex w-full items-center gap-6 text-3xl font-medium">
+            <div className="flex w-full items-center justify-between gap-6 text-xl font-medium sm:text-3xl">
               <h1>Game Over</h1>
               <div className="font-medium">Score: {score}</div>
             </div>
@@ -137,7 +137,7 @@ export function GameOverModal({
       ) : (
         <>
           <div className="flex items-center gap-6">
-            <div className="text-2xl">High Scores:</div>
+            <div className="text-xl sm:text-2xl">High Scores:</div>
             {newHighScore && (
               <div className="text-nowrap text-lg text-blue-500">
                 New High Score!
@@ -152,7 +152,7 @@ export function GameOverModal({
                 <div
                   key={score.id}
                   className={cn(
-                    "flex text-2xl",
+                    "flex text-xl sm:text-2xl",
                     newHighScore === score.id && "text-blue-500",
                   )}
                 >

@@ -36,13 +36,13 @@ export default function Threes() {
       )}
 
       <div className="grid w-80 grid-cols-3 place-items-center ">
-        <p className="text-lg font-medium">{mode}</p>
+        <p className="text-lg font-medium"></p>
         <NextTile value={nextTile} />
-        <Switch
+        {/* <Switch
           onCheckedChange={(value) => {
             setMode(() => (value ? "bot" : "player"));
           }}
-        />
+        /> */}
       </div>
 
       <div

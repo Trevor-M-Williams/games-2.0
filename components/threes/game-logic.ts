@@ -30,6 +30,34 @@ export function useGameLogic(gridSize: number) {
   useEffect(() => {
     if (gameOver || isTransitioning) return;
 
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    const handleTouchStart = (event: TouchEvent) => {
+      touchStartX = event.touches[0].clientX;
+      touchStartY = event.touches[0].clientY;
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      event.preventDefault();
+    };
+
+    const handleTouchEnd = (event: TouchEvent) => {
+      const touchEndX = event.changedTouches[0].clientX;
+      const touchEndY = event.changedTouches[0].clientY;
+
+      const diffX = touchStartX - touchEndX;
+      const diffY = touchStartY - touchEndY;
+
+      if (Math.abs(diffX) > Math.abs(diffY)) {
+        if (diffX > 0) processMove("ArrowLeft");
+        else processMove("ArrowRight");
+      } else {
+        if (diffY > 0) processMove("ArrowUp");
+        else processMove("ArrowDown");
+      }
+    };
+
     if (mode === "player") {
       const handleKeyDown = (event: KeyboardEvent) => {
         const validKeys = [
@@ -47,7 +75,16 @@ export function useGameLogic(gridSize: number) {
       };
 
       window.addEventListener("keydown", handleKeyDown);
-      return () => window.removeEventListener("keydown", handleKeyDown);
+      window.addEventListener("touchstart", handleTouchStart);
+      window.addEventListener("touchmove", handleTouchMove, { passive: false });
+      window.addEventListener("touchend", handleTouchEnd);
+
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+        window.removeEventListener("touchstart", handleTouchStart);
+        window.removeEventListener("touchmove", handleTouchMove);
+        window.removeEventListener("touchend", handleTouchEnd);
+      };
     } else if (mode === "bot") {
       const interval = setInterval(simulateBotMove, 100);
       return () => clearInterval(interval);
@@ -64,6 +101,7 @@ export function useGameLogic(gridSize: number) {
     nextTile,
     highTile,
     mode,
+    processMove,
   ]);
 
   async function fetchScores() {
@@ -98,7 +136,7 @@ export function useGameLogic(gridSize: number) {
       [...initialTileBag].sort(() => Math.random() - 0.5),
     );
     setTiles(newTiles);
-    setTileBag(newTileBag.slice(1)); // Remove the first tile which is set as nextTile
+    setTileBag(newTileBag.slice(1));
     setNextTile(newTileBag[0]);
     setGameOver(false);
     setMoveCount(0);
