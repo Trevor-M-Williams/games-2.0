@@ -1,11 +1,12 @@
 "use client";
+import { useGameLogic } from "@/components/threes/game-logic";
 import {
   GridSpace,
   NextTile,
   Tile,
   GameOverModal,
 } from "@/components/threes/ui";
-import { useGameLogic } from "@/components/threes/game-logic";
+import { Switch } from "@/components/ui/switch";
 
 export default function Threes() {
   const gridSize = 3;
@@ -18,6 +19,8 @@ export default function Threes() {
     score,
     highScores,
     newHighScore,
+    mode,
+    setMode,
   } = useGameLogic(gridSize);
 
   return (
@@ -32,7 +35,15 @@ export default function Threes() {
         />
       )}
 
-      <NextTile value={nextTile} />
+      <div className="grid w-80 grid-cols-3 place-items-center ">
+        <p className="text-lg font-medium">{mode}</p>
+        <NextTile value={nextTile} />
+        <Switch
+          onCheckedChange={(value) => {
+            setMode(() => (value ? "bot" : "player"));
+          }}
+        />
+      </div>
 
       <div
         className="relative grid gap-4 rounded-lg bg-gray-200 p-4"

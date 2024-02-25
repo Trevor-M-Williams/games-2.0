@@ -6,14 +6,13 @@ import {
   checkGameOver,
   calculateScore,
   getBonusTile,
-  updateNewTile,
 } from "./utils";
 
 export function useGameLogic(gridSize: number) {
   const initialTileBag = [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3];
   const [tiles, setTiles] = useState<Tile[]>([]);
   const [tileBag, setTileBag] = useState(initialTileBag);
-  const [nextTile, setNextTile] = useState(0);
+  const [nextTile, setNextTile] = useState<number | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [moveCount, setMoveCount] = useState(0);
   const [gameOver, setGameOver] = useState(false);
@@ -24,9 +23,8 @@ export function useGameLogic(gridSize: number) {
   const [mode, setMode] = useState("player");
 
   useEffect(() => {
-    restartGame();
+    handleRestart();
     fetchScores();
-    // setMode("bot");
   }, [gridSize]);
 
   useEffect(() => {
@@ -51,7 +49,7 @@ export function useGameLogic(gridSize: number) {
       window.addEventListener("keydown", handleKeyDown);
       return () => window.removeEventListener("keydown", handleKeyDown);
     } else if (mode === "bot") {
-      const interval = setInterval(simulateBotMove, 500);
+      const interval = setInterval(simulateBotMove, 100);
       return () => clearInterval(interval);
     } else {
       console.error("Invalid mode");
@@ -94,7 +92,7 @@ export function useGameLogic(gridSize: number) {
     });
   }
 
-  function restartGame() {
+  function handleRestart() {
     const { newTiles, newTileBag } = initTiles(
       gridSize,
       [...initialTileBag].sort(() => Math.random() - 0.5),
@@ -196,7 +194,9 @@ export function useGameLogic(gridSize: number) {
     highScores,
     newHighScore,
     moveCount,
-    handleRestart: restartGame,
+    handleRestart,
     handleGameOver,
+    mode,
+    setMode,
   };
 }

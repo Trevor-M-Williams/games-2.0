@@ -26,7 +26,8 @@ export function calculateScore(tiles: Tile[]) {
 }
 
 export function checkGameOver(tiles: Tile[], gridSize: number) {
-  // logTiles(tiles, gridSize);
+  console.log(tiles);
+  logTiles(tiles, gridSize);
 
   if (tiles.length < gridSize ** 2) return false;
 
@@ -195,7 +196,7 @@ export function updateTiles(
   key: string,
   tiles: Tile[],
   gridSize: number,
-  nextTile: number,
+  nextTile: number | null,
 ) {
   let moved = false;
   let newTiles = tiles.map((t) => {
@@ -266,7 +267,12 @@ export function updateTiles(
     }
   }
 
-  if (!moved || !direction) return { moved, newTiles, newTile: null };
+  if (!moved) return { moved, newTiles, newTile: null };
+
+  if (!direction || !nextTile) {
+    console.error("Invalid direction or nextTile");
+    return { moved, newTiles, newTile: null };
+  }
 
   const newTile = spawnTile(newTiles, gridSize, nextTile, direction);
   newTiles.push(newTile);

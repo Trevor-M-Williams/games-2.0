@@ -30,31 +30,33 @@ export function Tile({
   if (value === 2) bgColor = "bg-blue-400";
 
   useEffect(() => {
-    if (!transition) return;
-    if (!tileRef.current) return;
+    if (!transition || !tileRef.current) return;
 
-    let xStart = xPos;
-    let yStart = yPos;
+    let xTransform = 0;
+    let yTransform = 0;
 
-    if (transition === "left") xStart += 2 * dx;
-    else if (transition === "right") xStart -= 2 * dx;
-    else if (transition === "up") yStart += 2 * dy;
-    else if (transition === "down") yStart -= 2 * dy;
+    if (transition === "left") xTransform = 2 * dx;
+    else if (transition === "right") xTransform = -2 * dx;
+    else if (transition === "up") yTransform = 2 * dy;
+    else if (transition === "down") yTransform = -2 * dy;
 
-    tileRef.current.style.transform = `translate(${xStart}px, ${yStart}px)`;
+    tileRef.current.style.top = `${yTransform}px`;
+    tileRef.current.style.left = `${xTransform}px`;
 
-    setTimeout(() => {
-      if (!tileRef.current) return;
-
-      tileRef.current.style.transform = `translate(${xPos}px, ${yPos}px)`;
-    }, 10);
-  }, [value, position]);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (!tileRef.current) return;
+        tileRef.current.style.top = `0px`;
+        tileRef.current.style.left = `0px`;
+      });
+    });
+  }, [value, position, transition]);
 
   return (
     <div
       ref={tileRef}
       className={cn(
-        " absolute flex h-32 w-24 items-center justify-center rounded border text-6xl transition-transform duration-200",
+        " absolute flex h-32 w-24 items-center justify-center rounded border text-6xl transition-all duration-200",
         bgColor,
       )}
       style={{
@@ -66,10 +68,11 @@ export function Tile({
   );
 }
 
-export function NextTile({ value }: { value: number }) {
+export function NextTile({ value }: { value: number | null }) {
   let bgColor = "bg-white";
   if (value === 1) bgColor = "bg-red-400";
   if (value === 2) bgColor = "bg-blue-400";
+  if (!value) bgColor = "bg-gray-200";
 
   return (
     <div className="rounded bg-gray-200 p-3">
